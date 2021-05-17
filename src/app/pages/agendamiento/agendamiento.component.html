@@ -1,0 +1,178 @@
+<div class="card animated bounceInDown">
+    <h2 class="card-title">Creacion de la agendas</h2>
+
+    <div class="alert alert-info text-center m-1" role="alert" *ngIf="booCargando">
+        <div class="alert-heading">Cargando</div>
+        <i class="fa fa-spin fa-refresh"> </i>
+        <p class="mb-0">Espera por fa</p>
+    </div>
+    <div class="card-body mat-elevation-z10" *ngIf="Servicios.length > 0">
+        <form [formGroup]="form" (submit)="guardar()" class="mat-elevation-z5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col">
+                                    <mat-form-field class="sizeSelect">
+                                        <mat-label>Fecha Inicio</mat-label>
+
+                                        <input matInput readonly formControlName="fecha_Inicio" [matDatepicker]="picker" placeholder="yyyy-mm-dd" readonly />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <mat-form-field class="sizeSelect">
+                                        <mat-label>Fecha Final</mat-label>
+
+                                        <input readonly matInput [matDatepicker]="pickerFinal" formControlName="fecha_Fin" placeholder="yyyy-mm-dd" readonly />
+                                        <mat-datepicker-toggle matSuffix [for]="pickerFinal"></mat-datepicker-toggle>
+                                        <mat-datepicker #pickerFinal></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <mat-form-field class="sizeSelect">
+                                        <mat-label> Servicios </mat-label>
+                                        <select matNativeControl class="sizeSelect" formControlName="servicio">
+                      <option value="0">-Selecciona-</option>
+
+                      <option
+                        [value]="ser.id_servicio"
+                        *ngFor="let ser of Servicios"
+                      >
+                        {{ ser.nom_servicio }}
+                      </option>
+                    </select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col text-danger">
+                                    <p *ngIf="campoNoValido('fecha_Inicio')">
+                                        *La fecha inicial es obligatoria no debe ser menor a la fecha final debe ser mayor o igual a la actual
+                                    </p>
+                                    <p *ngIf="campoNoValido('fecha_Fin')">
+                                        *La fecha final es obligatoria
+                                    </p>
+                                    <p *ngIf="campoNoValido('servicio')">
+                                        * Selecciona algun servicio
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col text-center">
+                                    <button type="submit" [disabled]="form.invalid" class="btn btn-success waves-effect waves-light m-r-10">
+                    <i class="fa fa-life-saver"></i> Crear Turno
+                  </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="card">
+            <h2 class="card-title">Lista de turnos</h2>
+
+            <div class="mat-elevation-z5" *ngIf="turnosConsulta.length > 0">
+                <table mat-table [dataSource]="dataSource" matSort>
+                    <!-- Position Column -->
+                    <ng-container matColumnDef="fecha_turno">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Fecha turno.
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.fecha_turno | date: "yyyy-MM-dd" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="hora_inicio">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Hora inicio
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.hora_inicio | date: "HH-mm" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Weight Column -->
+                    <ng-container matColumnDef="hora_fin">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Hora fin</th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.hora_fin | date: "HH-mm" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Weight Column -->
+                    <ng-container matColumnDef="nombre_estado">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>estado</th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.nombre_estado }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="nom_servicio">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            <mat-form-field class="sizeSelect">
+                                <mat-label> Servicios </mat-label>
+                                <select matNativeControl class="sizeSelect" [(ngModel)]="servicioFiltro" (change)="onChangeSelectServicio()">
+                  <option value="0">-Todos-</option>
+
+                  <option
+                    [value]="ser.id_servicio"
+                    *ngFor="let ser of Servicios"
+                  >
+                    {{ ser.nom_servicio }}
+                  </option>
+                </select>
+                            </mat-form-field>
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.nom_servicio }}
+                        </td>
+                    </ng-container>
+
+
+                    <ng-container matColumnDef="non_comercio">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            <mat-form-field class="sizeSelect">
+                                <mat-label> Comercios </mat-label>
+                                <select matNativeControl class="sizeSelect" [(ngModel)]="comercioFiltro" (change)="onChangeSelectComercio()">
+                  <option value="0">-Todos-</option>
+
+                  <option
+                    [value]="ser.id_comercio"
+                    *ngFor="let ser of Comercios"
+                  >
+                    {{ ser.non_comercio }}
+                  </option>
+                </select>
+                            </mat-form-field>
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.non_comercio }}
+                        </td>
+                    </ng-container>
+
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns">zz</tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                </table>
+
+                <mat-paginator #MatPaginator [pageSize]="5" [pageSizeOptions]="[5, 15, 25]" showFirstLastButtons></mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>
